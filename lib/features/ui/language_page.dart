@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../language_controller.dart';
 import '../widgets/language_tile.dart';
 

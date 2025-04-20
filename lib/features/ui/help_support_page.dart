@@ -10,7 +10,8 @@ class HelpSupportPage extends StatelessWidget {
         titleSpacing: 0,
         title: const Text("Help & Support"),
         backgroundColor: Colors.amber,
-      ),      body: SingleChildScrollView(
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -25,9 +26,12 @@ class HelpSupportPage extends StatelessWidget {
 
             // FAQ Section
             _buildSectionTitle("FAQs"),
-            _buildFAQItem("How to reset my password?", "Go to settings > Change Password and follow the instructions."),
-            _buildFAQItem("How to contact support?", "You can email us, call us, or use the live chat feature."),
-            _buildFAQItem("How do I delete my account?", "Please contact support to request account deletion."),
+            _buildFAQItem("How to reset my password?",
+                "Go to settings > Change Password and follow the instructions."),
+            _buildFAQItem("How to contact support?",
+                "You can email us, call us, or use the live chat feature."),
+            _buildFAQItem("How do I delete my account?",
+                "Please contact support to request account deletion."),
 
             const SizedBox(height: 24),
 
@@ -61,7 +65,8 @@ class HelpSupportPage extends StatelessWidget {
         leading: Icon(icon, color: Colors.amber),
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+        trailing:
+            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
         onTap: () {}, // Add action here
       ),
     );
@@ -73,7 +78,8 @@ class HelpSupportPage extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ExpansionTile(
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        title: Text(question, style: const TextStyle(fontWeight: FontWeight.w600)),
+        title:
+            Text(question, style: const TextStyle(fontWeight: FontWeight.w600)),
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -96,20 +102,23 @@ class HelpSupportPage extends StatelessWidget {
               maxLines: 4,
               decoration: InputDecoration(
                 hintText: "Write your feedback...",
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {}, // Add submit action
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.amber.shade700,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text("Submit", style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: const Text("Submit",
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
           ],

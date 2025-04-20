@@ -24,12 +24,20 @@ dependencies:
   firebase_auth: ^5.5.2
   cloud_firestore: ^5.6.6
   firebase_storage: ^12.4.5
+  chat_bubbles: ^1.7.0
+  image_picker: ^1.1.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/talk.png"
 
 flutter:
   uses-material-design: true

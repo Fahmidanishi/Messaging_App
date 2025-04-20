@@ -3,10 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled2/features/ui/main_bottom_nav.dart';
-
 import '../../common/constrants.dart';
 import '../../common/custom_navigator.dart';
-import '../ui/home_page.dart';
 import 'login_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -120,7 +118,7 @@ class _SignUpPageState extends State<SignUpPage> {
       UserCredential userCredential =
       await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: _emailTEController.text.trim(),
-        password: _passwordTEController.text.trim(),
+        password: _passwordTEController.text,
       );
 
       await FirebaseFirestore.instance
@@ -148,7 +146,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
 
   void _showError(String? message) {
-    setState(() => _isLoading = false); // 👈 Stop loading on error
+    setState(() => _isLoading = false); //  Stop loading on error
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message ?? "An error occurred")),
     );

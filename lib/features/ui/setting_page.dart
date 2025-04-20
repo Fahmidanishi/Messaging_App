@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../common/custom_navigator.dart';
 import '../auth/login_page.dart';
 import 'about_page.dart';

@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
                                 keyboardType: TextInputType.emailAddress,
                                 controller: _emailTEController,
                                 decoration:
-                                    const InputDecoration(hintText: 'Email'),
+                                const InputDecoration(hintText: 'Email'),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'This field cannot be empty';
@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                                 controller: _passwordTEController,
                                 obscureText: true,
                                 decoration:
-                                    const InputDecoration(hintText: 'password'),
+                                const InputDecoration(hintText: 'password'),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return 'This field cannot be empty';
@@ -73,7 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                                 child: TextButton(
                                   onPressed: () => customNavigator(
                                       context, const ForgotPassPage()),
-                                  child: const Text('Forgot Password?',
+                                  child: const Text('Reset Password.',
                                       style: TextStyle(color: Colors.amber)),
                                 ),
                               ),
@@ -87,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
                                   style: const TextStyle(
                                       color: Colors.black,
                                       fontWeight: FontWeight.w600),
-                                  text: 'Register?',
+                                  text: 'Register?   ',
                                   children: [
                                     TextSpan(
                                       style: const TextStyle(color: Colors.blue),
@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       // Attempt login with email and password
       final loginResult = await AuthServices.onLogin(
-       _emailTEController.text.trim(),
+        _emailTEController.text.trim(),
         _passwordTEController.text.trim(),
       );
 

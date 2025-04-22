@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../auth/login_page.dart';
 
 class EditProfile extends StatefulWidget {
   const EditProfile({super.key});
@@ -10,28 +13,119 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
-  final TextEditingController _nameController =
-      TextEditingController(text: "Nishi");
-  final TextEditingController _emailController =
-      TextEditingController(text: "nishi@example.com");
-  final TextEditingController _bioController =
-      TextEditingController(text: "Software Developer | Flutter Enthusiast");
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _aboutController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  void _saveProfile() {
-    if (_formKey.currentState!.validate()) {
-      // Save logic here
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile updated successfully!")),
-      );
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserData();
+  }
+
+  Future<void> _getUserData() async {
+    _user = _auth.currentUser;
+    if (_user != null) {
+      DocumentSnapshot userDoc =
+      await _firestore.collection('users').doc(_user!.uid).get();
+      setState(() {
+        _nameController.text = userDoc['name'] ?? '';
+        _aboutController.text = userDoc['about'] ?? '';
+      });
     }
+  }
+
+  Future<void> _saveProfile() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        if (_user != null) {
+          // Update display name
+          await _user!.updateDisplayName(_nameController.text);
+
+          // Update Firestore user data
+          await _firestore.collection('users').doc(_user!.uid).update({
+            'name': _nameController.text,
+            'about': _aboutController.text,
+          });
+
+          // Optional password change
+          if (_passwordController.text.isNotEmpty) {
+            await _user!.updatePassword(_passwordController.text);
+          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Profile updated successfully!")),
+          );
+
+          Navigator.pop(context, true); // Go back to settings page
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    }
+  }
+
+  // Function to delete account
+  Future<void> _deleteAccount() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure?'),
+          content: const Text('This will permanently delete your account and all data associated with it.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  if (_user != null) {
+                    // Delete the user document from Firestore
+                    await _firestore.collection('users').doc(_user!.uid).delete();
+
+                    // Delete the Firebase Authentication user
+                    await _user!.delete();
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Account deleted successfully")),
+                    );
+
+                    // Navigate to the login page after deletion
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const LoginPage()));
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Error: $e")),
+                  );
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final String email = _auth.currentUser?.email ?? '';
+
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0,
         title: const Text("Edit Profile",
             style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: Colors.amber,
@@ -81,20 +175,52 @@ class _EditProfileState extends State<EditProfile> {
 
               const SizedBox(height: 32),
 
-              // Name Field
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.email, color: Colors.amber),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                email,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+
               _buildTextFormField("Full Name", _nameController),
               const SizedBox(height: 16),
 
-              // Email Field
-              _buildTextFormField("Email", _emailController,
-                  keyboardType: TextInputType.emailAddress),
+              _buildTextFormField("About", _aboutController, maxLines: 3),
               const SizedBox(height: 16),
 
-              // Bio Field
-              _buildTextFormField("Bio", _bioController, maxLines: 3),
-              const SizedBox(height: 32),
+              // // Email (read-only)
+              // TextFormField(
+              //   initialValue: email,
+              //   readOnly: true,
+              //   decoration: const InputDecoration(
+              //     labelText: "Email",
+              //     border: OutlineInputBorder(),
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
 
-              // Save Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -111,6 +237,24 @@ class _EditProfileState extends State<EditProfile> {
               ),
 
               const SizedBox(height: 24),
+
+              // Delete Account Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _deleteAccount,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    backgroundColor: Colors.red.shade700,
+                  ),
+                  child: const Text("Delete Account",
+                      style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+              ),
+
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -118,14 +262,24 @@ class _EditProfileState extends State<EditProfile> {
     );
   }
 
-  // Reusable TextFormField with validation
-  Widget _buildTextFormField(String label, TextEditingController controller,
-      {TextInputType keyboardType = TextInputType.text, int maxLines = 1}) {
+  Widget _buildTextFormField(
+      String label,
+      TextEditingController controller, {
+        TextInputType keyboardType = TextInputType.text,
+        bool obscureText = false,
+        int maxLines = 1,
+      }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
+      obscureText: obscureText,
       maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
       validator: (value) {
+        if (label.contains("Password")) return null;
         if (value == null || value.trim().isEmpty) {
           return "$label can't be empty";
         }
@@ -137,8 +291,8 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
-    _bioController.dispose();
+    _aboutController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 }

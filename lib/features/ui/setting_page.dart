@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../common/custom_navigator.dart';
 import '../auth/login_page.dart';
@@ -6,26 +8,61 @@ import 'edit_profile.dart';
 import 'help_support_page.dart';
 import 'language_page.dart';
 
-class SettingPage extends StatelessWidget {
+class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
+
+  @override
+  State<SettingPage> createState() => _SettingPageState();
+}
+
+class _SettingPageState extends State<SettingPage> {
+  String name = '';
+  String email = '';
+  String about = '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        setState(() {
+          name = userDoc['name'] ?? '';
+          email = userDoc['email'] ?? '';
+          about = userDoc['about'] ?? '';
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        titleSpacing: 0,
-        title: const Text("Settings",
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        automaticallyImplyLeading: false,
+        titleSpacing: 16,
+        title: const Text("Settings", style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: Colors.amber,
         elevation: 0,
       ),
-      body: Padding(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
             const SizedBox(height: 24),
-
-            // Profile Section
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -45,38 +82,45 @@ class SettingPage extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // Profile Picture
                   const CircleAvatar(
                     radius: 44,
                     backgroundColor: Colors.white,
                     child: Icon(Icons.person, size: 70, color: Colors.grey),
                   ),
-
                   const SizedBox(width: 16),
-
-                  // User Info & Button
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Nishi",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600),
-                        ),
+                        Text(name,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 4),
-                        const Text(
-                          "nishi@example.com",
-                          style: TextStyle(fontSize: 14, color: Colors.black54),
-                        ),
+                        Text(email,
+                            style: const TextStyle(
+                                fontSize: 14, color: Colors.black54)),
+                        if (about.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              about,
+                              style: const TextStyle(
+                                  fontSize: 13, color: Colors.black87),
+                            ),
+                          ),
                         const SizedBox(height: 12),
-
-                        // Edit Profile Button
                         Align(
                           alignment: Alignment.centerLeft,
                           child: OutlinedButton.icon(
-                            onPressed: () {
-                              customNavigator(context, const EditProfile());
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const EditProfile()),
+                              );
+                              if (result == true) {
+                                fetchUserData(); // Refresh on return
+                              }
                             },
                             icon: const Icon(Icons.edit,
                                 size: 18, color: Colors.black),
@@ -98,34 +142,25 @@ class SettingPage extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 32),
-
-            // Settings List
             _buildSettingsOption(Icons.language, "Language", () {
-              customNavigator(context,  const LanguagePage());
-
+              customNavigator(context, const LanguagePage());
             }),
             _buildSettingsOption(Icons.help_outline, "Help & Support", () {
-              customNavigator(context,  const HelpSupportPage());
-
+              customNavigator(context, const HelpSupportPage());
             }),
             _buildSettingsOption(Icons.info_outline, "About", () {
-              customNavigator(context,  const AboutPage());
-
+              customNavigator(context, const AboutPage());
             }),
-
             const Spacer(),
-
-            // Logout Button
             ElevatedButton.icon(
-              onPressed: () {
-                customNavigator(context,  const LoginPage());
-
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                customNavigator(context, const LoginPage());
               },
               icon: const Icon(Icons.logout, color: Colors.white),
               label:
-                  const Text("Logout", style: TextStyle(color: Colors.white)),
+              const Text("Logout", style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 shape: RoundedRectangleBorder(
@@ -135,7 +170,6 @@ class SettingPage extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 48),
               ),
             ),
-
             const SizedBox(height: 24),
           ],
         ),
@@ -143,7 +177,6 @@ class SettingPage extends StatelessWidget {
     );
   }
 
-  // Reusable Widget for Settings Options
   Widget _buildSettingsOption(IconData icon, String title, VoidCallback onTap) {
     return Column(
       children: [
@@ -151,9 +184,9 @@ class SettingPage extends StatelessWidget {
           leading: Icon(icon, color: Colors.amber.shade700),
           title: Text(title,
               style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
           trailing:
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
           onTap: onTap,
         ),
         Divider(color: Colors.grey.shade300),

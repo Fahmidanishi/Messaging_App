@@ -135,7 +135,7 @@ class _CompleteProfileState extends State<CompleteProfile> {
         'profileImage': imageUrl,
         'createdAt': Timestamp.now(),
       });
-      customNavigatorPushRemoveAll(context, const HomePage());
+     // customNavigatorPushRemoveAll(context, const HomePage());
 
     } on FirebaseAuthException catch (e) {
       _showError(e.message);

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../common/custom_navigator.dart';
 import '../auth/login_page.dart';
@@ -12,6 +14,36 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String userName = '';
+  String userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserInfo();
+  }
+
+  Future<void> loadUserInfo() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      setState(() {
+        userEmail = currentUser.email ?? '';
+      });
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        setState(() {
+          userName = data['name'] ?? '';
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,15 +60,15 @@ class _HomePageState extends State<HomePage> {
             UserAccountsDrawerHeader(
               decoration: const BoxDecoration(color: Colors.amber),
               accountName: Text(
-                "Nishi".toUpperCase(),
+                userName.isNotEmpty ? userName.toUpperCase() : 'Loading...',
                 style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),
-              accountEmail: const Text(
-                "abc@gmail.com",
-                style: TextStyle(color: Colors.black),
+              accountEmail: Text(
+                userEmail.isNotEmpty ? userEmail : 'Loading...',
+                style: const TextStyle(color: Colors.black),
               ),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.grey.shade300,

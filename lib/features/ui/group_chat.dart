@@ -81,7 +81,7 @@ class _GroupChatState extends State<GroupChat> {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: false, //debug banner hide
         titleSpacing: 16,
         title: const Text("Teams", style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: Colors.amber,

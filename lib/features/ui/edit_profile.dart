@@ -17,10 +17,10 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController _aboutController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance; //manage Firebase Authentication.
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance; //interact with Firestore and update user data
 
-  User? _user;
+  User? _user; // holds the current logged-in user
 
   @override
   void initState() {

@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../common/custom_navigator.dart';
 import '../auth/login_page.dart';
-import 'chat_page.dart';
+import 'chatpage.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

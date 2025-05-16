@@ -29,13 +29,17 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   Future<void> _getUserData() async {
+    // Get the current authenticated user
     _user = _auth.currentUser;
+    //Check if the user is logged in
     if (_user != null) {
+      // Fetch the user's document from Firestore using the user ID (uid)
       DocumentSnapshot userDoc =
       await _firestore.collection('users').doc(_user!.uid).get();
       setState(() {
-        _nameController.text = userDoc['name'] ?? '';
-        _aboutController.text = userDoc['about'] ?? '';
+        _nameController.text = userDoc['name'] ?? ''; // Set name or empty if not found
+        _aboutController.text = userDoc['about'] ?? ''; // Set about or empty if not found
+
       });
     }
   }
@@ -279,11 +283,11 @@ class _EditProfileState extends State<EditProfile> {
         border: const OutlineInputBorder(),
       ),
       validator: (value) {
-        if (label.contains("Password")) return null;
-        if (value == null || value.trim().isEmpty) {
-          return "$label can't be empty";
+        if (label.contains("Password")) return null; // Skip validation for Password fields
+        if (value == null || value.trim().isEmpty) { // Check if the field is empty
+          return "$label can't be empty"; // Error message if field is empty
         }
-        return null;
+        return null; // Return null if everything is fine
       },
     );
   }
